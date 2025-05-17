@@ -8,13 +8,13 @@
 # ==========================================================
 
 /system script
-add dont-require-permissions=no name=ProfileBandwidth owner=jnhl policy=\
+add dont-require-permissions=no name=ProfileBandwidth policy=\
     ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon source="P\
     LAN1000= 20480k/20480k 20M/20M \r\
     \nPLAN1695= 30720k/30720k 30M/30M\r\
     \nPLAN2000= 40960k/40960k 40M/40M\r\
     \nVendo= 1k/1k"
-add dont-require-permissions=yes name=Auto-PPPoE-User-Creation owner=jnhl \
+add dont-require-permissions=yes name=Auto-PPPoE-User-Creation \
     policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon \
     source=":log info \"[AUTO-PPPOE] \?\? Auto user sync START\"\r\
     \n\r\
