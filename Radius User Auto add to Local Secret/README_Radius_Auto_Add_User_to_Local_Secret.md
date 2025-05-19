@@ -51,6 +51,17 @@ Each PPPoE plan must have the exact `max-limit` string in its **`comment`** fiel
 ## 📜 Script Source Code
 
 ```rsc
+# ==========================================================
+# Script Name : PPPoE Auto User Creator
+# Description : Automatically creates PPPoE users from a Active tab area
+# Author      : jesienazareth (jesync)
+# Version     : v1.0, 2025-05-17
+# Target      : MikroTik RouterOS 7.x+
+# Usage       : Import to System > Scripts or run via terminal
+# Auto-PPPoE User Creation â€“ FINAL CLEAN FIXED VERSION
+# Supports toggle: username=password OR global password
+# ==========================================================
+
 :local useGlobalPassword true
 :local globalPassword "pass123"
 
