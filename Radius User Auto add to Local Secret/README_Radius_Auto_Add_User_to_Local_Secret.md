@@ -28,7 +28,7 @@ Each PPPoE plan must have the exact `max-limit` string in its **`comment`** fiel
 This profile name is example only use your own profile names, no need to copy this profile names
 this is only example that in the comment section required to add the format below, 
 To ensure that each PPPoE user is assigned the correct bandwidth profile automatically,
-you must define the exact max-limit string from thr simple queue user max limit and put it in the comment field of each PPP profile.
+you must define the exact max-limit string from the simple Queue of the user and put it in the comment field of each PPP profile.
 
 
 | **PPP Profile Name** | **Comment (Exact Bandwidth)** |
