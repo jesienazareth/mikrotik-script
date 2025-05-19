@@ -14,7 +14,7 @@ This MikroTik RouterOS script automatically creates **disabled** PPPoE users in 
 - 📶 Match user's dynamic simple queue (e.g. `pppoe-username`)
 - 🔁 Extract exact `max-limit` (e.g. `20480k/20480k`)
 - 🔎 Compare against profile `comment` to determine correct plan
-- 💡 Optional static global password (e.g. `pass123`)
+- 🔐 Optional static global password (e.g. `pass123`)
 - 📋 Adds user to `/ppp secret` as **disabled** (safe default)
 - 🔄 Supports integration with **LibreQoS's `updatecsv.py`**
 
@@ -22,9 +22,9 @@ This MikroTik RouterOS script automatically creates **disabled** PPPoE users in 
 
 ## 🔧 Prerequisites
 
-### MikroTik Profile Setup (Required):
+### MikroTik Profile Setup
 
-For this script to match correctly, each profile must include the target bandwidth string in the **`comment`** field.
+Each PPPoE plan must have the exact `max-limit` string in its **`comment`** field:
 
 | Profile Name | Comment (Required Format)      |
 |--------------|-------------------------------|
@@ -33,23 +33,22 @@ For this script to match correctly, each profile must include the target bandwid
 | PLAN2000     | `40960k/40960k`               |
 | Vendo        | `1k/1k`                       |
 
-> The `comment` must match exactly what `max-limit` shows in dynamic queues.
-
 ---
 
-## 🔧 Script Installation
+## 🛠 Installation Instructions
 
-### 1. Open Winbox or WebFig
+### 1. Create the Script
 
+- Open **Winbox** or **WebFig**
 - Go to: **System > Scripts**
-- Create a **new script**
-  - **Name:** `Auto-PPPoE-User-Creation`
-  - **Policy:** Enable `read`, `write`, `policy`, `test`
-  - **Paste the script below into the source**
+- Create a new script:
+  - **Name**: `Auto-PPPoE-User-Creation`
+  - **Policy**: Enable `read`, `write`, `policy`, `test`
+  - **Paste the script source code** from below
 
 ---
 
-## 📜 Script (Final Version)
+## 📜 Script Source Code
 
 ```rsc
 :local useGlobalPassword true
@@ -91,7 +90,7 @@ For this script to match correctly, each profile must include the target bandwid
       :if ([:len $matchedProfile] > 0) do={
         :log info "[AUTO-PPPoE] ✅ Matched profile: $matchedProfile for $limit"
         /ppp secret add name=$username password=$password service=pppoe profile=$matchedProfile comment="AUTO-CREATED" disabled=yes
-        :log info "[AUTO-PPPoE] ➕ Added $username with profile $matchedProfile"
+        :log info "[AUTO-PPPoE] ➕ Added user $username with profile $matchedProfile"
       } else={
         :log warning "[AUTO-PPPoE] ❌ No matching profile comment for $limit"
       }
