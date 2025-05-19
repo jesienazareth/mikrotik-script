@@ -118,7 +118,7 @@ Modify this section in the script:
 # Supports toggle: username=password OR global password
 # ==========================================================
 
-:local useGlobalPassword true
+:local useGlobalPassword false
 :local globalPassword "pass123"
 
 :foreach u in=[/ppp active find] do={
