@@ -59,7 +59,7 @@ add dont-require-permissions=no name=Auto-PPPoE-User-Creation owner=jnhl \
     \n        :log info \"[AUTO-PPPoE] \E2\9C\85 Matched profile: \$matchedPro\
     file for \$limit\"\r\
     \n        /ppp secret add name=\$username password=\$password service=pppo\
-    e profile=\$matchedProfile comment=\"AUTO-CREATED\" disabled=yes\r\
+    e profile=\$matchedProfile comment=\"JESYNC-AUTO-CREATED\" disabled=yes\r\
     \n        :log info \"[AUTO-PPPoE] \E2\9E\95 Added user \$username with pr\
     ofile \$matchedProfile\"\r\
     \n      } else={\r\
