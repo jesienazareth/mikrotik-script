@@ -25,7 +25,8 @@ This MikroTik RouterOS script automatically creates **disabled** Radius PPPoE us
 ### MikroTik PPPoE Profile Setup
 
 Each PPPoE plan must have the exact `max-limit` string in its **`comment`** field:
-
+This profile name is example only use your own profile names, no need to copy this plan names
+this is only example that in the comment section required to add the format below
 | Profile Name | Comment (Required Format)      |
 |--------------|-------------------------------|
 | PLAN1000     | `20480k/20480k`               |
