@@ -1,6 +1,6 @@
 # MikroTik Auto Radius PPPoE User Add to Secrets Local Script
 
-This MikroTik RouterOS script automatically creates **disabled** PPPoE users in `/ppp secret` based on currently active PPPoE sessions. It matches dynamic queues and assigns profiles using bandwidth detection from `/queue simple`'s `max-limit`, aligned with LibreQoS shaping plans.
+This MikroTik RouterOS script automatically creates **disabled** Radius PPPoE users in `/ppp secret` based on currently active PPPoE sessions. It matches dynamic queues and assigns profiles using bandwidth detection from `/queue simple`'s `max-limit`, aligned with LibreQoS shaping plans.
 
 > ✅ Compatible with MikroTik RouterOS **v7.1+**
 > ✅ Designed for **LibreQoS integration** via `updatecsv.py` sync
