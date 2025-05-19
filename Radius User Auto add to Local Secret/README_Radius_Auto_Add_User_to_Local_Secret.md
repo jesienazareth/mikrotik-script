@@ -89,7 +89,7 @@ Each PPPoE plan must have the exact `max-limit` string in its **`comment`** fiel
 
       :if ([:len $matchedProfile] > 0) do={
         :log info "[AUTO-PPPoE] ✅ Matched profile: $matchedProfile for $limit"
-        /ppp secret add name=$username password=$password service=pppoe profile=$matchedProfile comment="AUTO-CREATED" disabled=yes
+        /ppp secret add name=$username password=$password service=pppoe profile=$matchedProfile comment="JESYNC-AUTO-CREATED" disabled=yes
         :log info "[AUTO-PPPoE] ➕ Added user $username with profile $matchedProfile"
       } else={
         :log warning "[AUTO-PPPoE] ❌ No matching profile comment for $limit"
