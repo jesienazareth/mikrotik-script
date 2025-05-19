@@ -36,14 +36,6 @@ this is only example that in the comment section required to add the format belo
 
 ---
 
-# MikroTik PPPoE Auto-User Creation with Bandwidth Plan Detection
-
-This script automatically creates disabled PPPoE secrets in your MikroTik router based on active users detected in `/ppp active`, matching their bandwidth profile by inspecting their dynamic **Simple Queue** `max-limit`.
-
-It is designed to support **LibreQoS shaping** and **Jesync auto-sync** by ensuring accurate mapping of users to their bandwidth plans.
-
----
-
 ## ✅ How It Works
 
 1. The script scans all active PPPoE sessions.
