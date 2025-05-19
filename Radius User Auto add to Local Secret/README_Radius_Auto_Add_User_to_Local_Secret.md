@@ -26,7 +26,7 @@ This MikroTik RouterOS script automatically creates **disabled** Radius PPPoE us
 
 Each PPPoE plan must have the exact `max-limit` string in its **`comment`** field:
 This profile name is example only use your own profile names, no need to copy this profile names
-this is only example that in the comment section required to add the format below
+this is only example that in the comment section required to add the format below, where do we get the comment bandwidth its the exact max limit of the user in the simple queue as identifiyer for the user bandwidth so that we dan identify its plan base on the bandwidth of the user
 | Profile Name | Comment (Required Format)      |
 |--------------|-------------------------------|
 | PLAN1000     | `20480k/20480k`               |
@@ -35,6 +35,63 @@ this is only example that in the comment section required to add the format belo
 | Vendo        | `1k/1k`                       |
 
 ---
+
+# MikroTik PPPoE Auto-User Creation with Bandwidth Plan Detection
+
+This script automatically creates disabled PPPoE secrets in your MikroTik router based on active users detected in `/ppp active`, matching their bandwidth profile by inspecting their dynamic **Simple Queue** `max-limit`.
+
+It is designed to support **LibreQoS shaping** and **Jesync auto-sync** by ensuring accurate mapping of users to their bandwidth plans.
+
+---
+
+## ✅ How It Works
+
+1. The script scans all active PPPoE sessions.
+2. For each user:
+   - It checks if they exist in `/ppp secret`.
+   - If not, it reads their Simple Queue `max-limit`.
+   - It then searches for a PPP profile with a **comment** that matches that exact `max-limit` string.
+   - If a match is found, it creates the user in `/ppp secret` (disabled) using the matched profile.
+
+---
+
+## ⚠️ Profile Comment Requirement
+
+Each PPP profile must have the exact bandwidth string (as used in `max-limit`) written in its **comment** field.
+
+This is the only way to correctly identify and assign the right bandwidth plan.
+
+### Example Profile Table
+
+| **PPP Profile Name** | **Comment (Exact Bandwidth)** |
+|----------------------|-------------------------------|
+| PLAN1000             | `20480k/20480k`               |
+| PLAN1695             | `30720k/30720k`               |
+| PLAN2000             | `40960k/40960k`               |
+
+> **Note:** The **profile name** can be anything you prefer.  
+> What matters is the **exact match** of the `comment` to the user's queue bandwidth.
+
+---
+
+## 📦 Integration with LibreQoS / Jesync
+
+- This script helps Jesync's `updatecsv.py` sync the correct users and bandwidth to `ShapedDevices.csv`.
+- Users are added locally as disabled PPP secrets so Jesync can extract bandwidth data and sync it to LibreQoS.
+- This ensures proper shaping and monitoring in Jesync + LibreQoS environments.
+
+---
+
+## ⚙️ Optional: Username = Password Toggle
+
+Inside the script, you can control whether:
+- Username and password are the same (default)
+- Or define your own password logic
+
+Modify this section in the script:
+```routeros
+# Set password same as username or define custom password logic
+:local password $username
 
 ## 🛠 Installation Instructions
 
