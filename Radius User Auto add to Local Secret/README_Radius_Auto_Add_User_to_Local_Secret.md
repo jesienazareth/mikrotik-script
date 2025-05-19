@@ -26,8 +26,9 @@ This MikroTik RouterOS script automatically creates **disabled** Radius PPPoE us
 
 Each PPPoE plan must have the exact `max-limit` string in its **`comment`** field:
 This profile name is example only use your own profile names, no need to copy this profile names
-this is only example that in the comment section required to add the format below, where do we get the comment bandwidth its the exact max limit of the user in the simple queue as identifiyer for the user bandwidth so that we dan identify its plan base on the bandwidth of the user
-| Profile Name | Comment (Required Format)      |
+this is only example that in the comment section required to add the format below, 
+To ensure that each PPPoE user is assigned the correct bandwidth profile automatically,
+you must define the exact max-limit string in the comment field of each PPP profile.
 |--------------|-------------------------------|
 | PLAN1000     | `20480k/20480k`               |
 | PLAN1695     | `30720k/30720k`               |
