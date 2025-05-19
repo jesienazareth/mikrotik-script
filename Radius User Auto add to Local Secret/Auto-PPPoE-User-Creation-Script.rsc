@@ -1,127 +1,71 @@
 # ==========================================================
 # Script Name : PPPoE Auto User Creator
 # Description : Automatically creates PPPoE users from a Active tab area
-# Author      : jesienazareth
+# Author      : jesienazareth (jesync)
 # Version     : v1.0, 2025-05-17
 # Target      : MikroTik RouterOS 7.x+
 # Usage       : Import to System > Scripts or run via terminal
 # ==========================================================
+# Auto-PPPoE User Creation â€“ FINAL CLEAN FIXED VERSION
+# Supports toggle: username=password OR global password
+
 
 /system script
-add dont-require-permissions=no name=ProfileBandwidth policy=\
-    ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon source="P\
-    LAN1000= 20480k/20480k 20M/20M \r\
-    \nPLAN1695= 30720k/30720k 30M/30M\r\
-    \nPLAN2000= 40960k/40960k 40M/40M\r\
-    \nVendo= 1k/1k"
-add dont-require-permissions=yes name=Auto-PPPoE-User-Creation \
+add dont-require-permissions=no name=Auto-PPPoE-User-Creation owner=jnhl \
     policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon \
-    source=":log info \"[AUTO-PPPOE] \?\? Auto user sync START\"\r\
+    source="# Auto-PPPoE User Creation \E2\80\93 FINAL CLEAN FIXED VERSION\r\
+    \n# Supports toggle: username=password OR global password\r\
     \n\r\
-    \n:foreach i in=[/ppp active find] do={\r\
+    \n:local useGlobalPassword false\r\
+    \n:local globalPassword \"pass123\"\r\
     \n\r\
-    \n    :local user [/ppp active get \$i name]\r\
-    \n    :local ip [/ppp active get \$i address]\r\
-    \n    :if ([:len \$ip] = 0) do={ :log warning (\"[AUTO-PPPOE] \? No IP for\
-    \_user: \" . \$user); :continue }\r\
+    \n:foreach u in=[/ppp active find] do={\r\
     \n\r\
-    \n    :log info (\"[AUTO-PPPOE] \?\? Checking user: \" . \$user . \" (IP: \
-    \" . \$ip . \")\")\r\
+    \n  :local username [/ppp active get \$u name]\r\
+    \n  :local ipaddr [/ppp active get \$u address]\r\
+    \n  :local password \$username\r\
     \n\r\
-    \n    :local targetIP (\$ip . \"/32\")\r\
-    \n    :local queueName (\"pppoe-\" . \$user)\r\
-    \n    :local defaultLimit \"20480k/20480k\"\r\
+    \n  :if (\$useGlobalPassword = true) do={\r\
+    \n    :set password \$globalPassword\r\
+    \n  }\r\
     \n\r\
-    \n    # Add or update simple queue\r\
-    \n    :if ([/queue simple find where name=\$queueName] != \"\") do={\r\
-    \n        /queue simple set [find name=\$queueName] target=\$targetIP max-\
-    limit=\$defaultLimit\r\
-    \n        :log info (\"[AUTO-PPPOE] \?\? Updated queue for: \" . \$queueNa\
-    me)\r\
-    \n    } else={\r\
-    \n        /queue simple add name=\$queueName target=\$targetIP max-limit=\
-    \$defaultLimit\r\
-    \n        :log info (\"[AUTO-PPPOE] \? Created queue for: \" . \$queueName\
-    )\r\
-    \n    }\r\
+    \n  :log info \"[AUTO-PPPoE] Checking \$username (\$ipaddr)\"\r\
     \n\r\
-    \n    # Skip if already in PPP secret\r\
-    \n    :if ([/ppp secret find where name=\$user] != \"\") do={\r\
-    \n        :log info (\"[AUTO-PPPOE] \? PPPoE user already exists: \" . \$u\
-    ser)\r\
+    \n  # Skip if already in /ppp secret\r\
+    \n  :if ([/ppp secret find where name=\"\$username\"] != \"\") do={\r\
+    \n    :log info \"[AUTO-PPPoE] \E2\9C\85 Already exists: \$username\"\r\
+    \n  } else={\r\
+    \n\r\
+    \n    # Try to find matching queue\r\
+    \n    :local qid [/queue simple find where name=\"<pppoe-\$username>\"]\r\
+    \n    :if ([:len \$qid] = 0) do={\r\
+    \n      :log warning \"[AUTO-PPPoE] \E2\9D\8C No queue for \$username\"\r\
     \n    } else={\r\
     \n\r\
-    \n        :local rawLimit [/queue simple get [find name=\$queueName] max-l\
-    imit]\r\
-    \n        :local limitStr [:pick \$rawLimit 0 [:find \$rawLimit \" \"]]\r\
-    \n        :if (\$limitStr = \"\") do={ :set limitStr \$rawLimit }\r\
+    \n      :local limit [/queue simple get \$qid max-limit]\r\
+    \n      :log info \"[AUTO-PPPoE] Max-limit = \$limit\"\r\
     \n\r\
-    \n        :local dl [:pick \$limitStr 0 [:find \$limitStr \"/\"]]\r\
-    \n        :local ul [:pick \$limitStr ([:find \$limitStr \"/\"] + 1) [:len\
-    \_\$limitStr]]\r\
-    \n        :local bwMatch1 (\$dl . \"/\" . \$ul)\r\
-    \n        :local bwMatch2 (\$ul . \"/\" . \$dl)\r\
+    \n      # Search profiles by comment containing \$limit\r\
+    \n      :local matchedProfile \"\"\r\
+    \n      :foreach p in=[/ppp profile find] do={\r\
     \n\r\
-    \n        :log info (\"[AUTO-PPPOE] \?\? Bandwidth = \$dl/\$ul\")\r\
-    \n\r\
-    \n        :local script [/system script get [find name=\"ProfileBandwidth\
-    \"] source]\r\
-    \n        :local matchedPlan \"\"\r\
-    \n\r\
-    \n        # Plan matching\r\
-    \n        :foreach line in=[:toarray \$script] do={\r\
-    \n            :local eqPos [:find \$line \"=\"]\r\
-    \n            :if (\$eqPos != -1) do={\r\
-    \n                :local rawPlan [:pick \$line 0 \$eqPos]\r\
-    \n                :local planLimits [:pick \$line (\$eqPos + 1) [:len \$li\
-    ne]]\r\
-    \n                :if (([:find \$planLimits \$bwMatch1] != -1) or ([:find \
-    \$planLimits \$bwMatch2] != -1)) do={\r\
-    \n                    :set matchedPlan [:pick \$rawPlan 0 [:len \$rawPlan]\
-    ]\r\
-    \n                    :log info (\"[AUTO-PPPOE] \? Matched plan: \" . \$ma\
-    tchedPlan)\r\
-    \n                }\r\
-    \n            }\r\
+    \n        :local comment [/ppp profile get \$p comment]\r\
+    \n        :if (\$comment ~ \$limit) do={\r\
+    \n          :set matchedProfile [/ppp profile get \$p name]\r\
     \n        }\r\
+    \n      }\r\
     \n\r\
-    \n        :if (\$matchedPlan = \"\") do={\r\
-    \n            :log warning (\"[AUTO-PPPOE] \? No plan match for \$dl/\$ul\
-    \")\r\
-    \n        } else={\r\
-    \n\r\
-    \n            # Reliable profile check (with debug log)\r\
-    \n            :local profileFound false\r\
-    \n            :foreach p in=[/ppp profile find] do={\r\
-    \n                :local profName [/ppp profile get \$p name]\r\
-    \n                :local cleanedProfile [:pick \$profName 0 [:len \$matche\
-    dPlan]]\r\
-    \n                :log info (\"[DEBUG] Comparing: match='\$matchedPlan' vs\
-    \_profile='\$cleanedProfile'\")\r\
-    \n                :if (\$matchedPlan = \$cleanedProfile) do={\r\
-    \n                    :set profileFound true\r\
-    \n                }\r\
-    \n            }\r\
-    \n\r\
-    \n            :if (\$profileFound = false) do={\r\
-    \n                :log warning (\"[AUTO-PPPOE] \?\? Profile missing: \" . \
-    \$matchedPlan)\r\
-    \n            } else={\r\
-    \n\r\
-    \n                :do {\r\
-    \n                    /ppp secret add name=\$user password=\$user profile=\
-    \$matchedPlan service=pppoe disabled=yes\r\
-    \n                } on-error={\r\
-    \n                    :log warning (\"[AUTO-PPPOE] \? Failed to add user: \
-    \" . \$user)\r\
-    \n                }\r\
-    \n\r\
-    \n                :log info (\"[AUTO-PPPOE] \? Created DISABLED PPPoE user\
-    : \$user with profile \$matchedPlan\")\r\
-    \n            }\r\
-    \n        }\r\
+    \n      :if ([:len \$matchedProfile] > 0) do={\r\
+    \n        :log info \"[AUTO-PPPoE] \E2\9C\85 Matched profile: \$matchedPro\
+    file for \$limit\"\r\
+    \n        /ppp secret add name=\$username password=\$password service=pppo\
+    e profile=\$matchedProfile comment=\"AUTO-CREATED\" disabled=yes\r\
+    \n        :log info \"[AUTO-PPPoE] \E2\9E\95 Added user \$username with pr\
+    ofile \$matchedProfile\"\r\
+    \n      } else={\r\
+    \n        :log warning \"[AUTO-PPPoE] \E2\9D\8C No matching profile commen\
+    t for \$limit\"\r\
+    \n      }\r\
     \n    }\r\
-    \n}\r\
-    \n\r\
-    \n:log info \"[AUTO-PPPOE] \?\? Auto user sync COMPLETE\"\r\
-    \n"
+    \n  }\r\
+    \n}"
