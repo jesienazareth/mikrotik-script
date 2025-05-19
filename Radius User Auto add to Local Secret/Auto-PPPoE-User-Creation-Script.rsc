@@ -5,9 +5,10 @@
 # Version     : v1.0, 2025-05-17
 # Target      : MikroTik RouterOS 7.x+
 # Usage       : Import to System > Scripts or run via terminal
-# ==========================================================
 # Auto-PPPoE User Creation â€“ FINAL CLEAN FIXED VERSION
 # Supports toggle: username=password OR global password
+# ==========================================================
+
 
 
 /system script
