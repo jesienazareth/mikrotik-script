@@ -1,87 +1,100 @@
+# MikroTik Auto PPPoE User Creator Script
 
-# MikroTik Auto PPPoE User Creation Script
+This MikroTik RouterOS script automatically creates **disabled** PPPoE users in `/ppp secret` based on currently active PPPoE sessions. It matches dynamic queues and assigns profiles using bandwidth detection from `/queue simple`'s `max-limit`, aligned with LibreQoS shaping plans.
 
-## 📜 Overview
-This script automates the following tasks on MikroTik RouterOS v7+:
-- Automatically checks active PPPoE sessions.
-- Verifies if the user already exists in `/ppp secret`.
-- If missing, creates a disabled PPPoE user and assigns the correct profile based on their bandwidth from `queue simple`.
-- Adds or updates the corresponding `simple queue`.
-- Uses a centralized `ProfileBandwidth` script for bandwidth-plan mapping.
-
-## 🔧 What it does
-1. **Creates two scripts inside MikroTik:**
-   - `ProfileBandwidth`: Defines bandwidth to plan name.
-   - `Auto-PPPoE-User-Creation`: Runs the user detection and creation logic.
-
-2. **Adds a scheduler that runs the `Auto-PPPoE-User-Creation` script every 6 hours**, starting at system startup.
+> ✅ Compatible with MikroTik RouterOS **v7.1+**
+> ✅ Designed for **LibreQoS integration** via `updatecsv.py` sync
+> ✅ Matches users by queue name → assigns proper bandwidth profile
 
 ---
 
-## 🚀 How to Install
+## 📦 Features
 
-### Step 1: Open Winbox or Terminal
-- Login to your MikroTik router.
-- Open **Terminal** window.
-
-### Step 2: Paste the provided script
-- Paste the entire provided batch script (see `Installer Script` above).
-- Press **Enter**.
-
-This will:
-- Add/replace `ProfileBandwidth`.
-- Add/replace `Auto-PPPoE-User-Creation`.
-- Set the scheduler.
+- 🧠 Auto-detect active PPPoE users (`/ppp active`)
+- 📶 Match user's dynamic simple queue (e.g. `pppoe-username`)
+- 🔁 Extract exact `max-limit` (e.g. `20480k/20480k`)
+- 🔎 Compare against profile `comment` to determine correct plan
+- 💡 Optional static global password (e.g. `pass123`)
+- 📋 Adds user to `/ppp secret` as **disabled** (safe default)
+- 🔄 Supports integration with **LibreQoS's `updatecsv.py`**
 
 ---
 
-## 📅 How It Works (Logic Flow)
-1. The script runs every **6 hours** via scheduler.
-2. It reads active PPPoE users from `/ppp active`.
-3. For each user:
-   - Checks if they already exist in `/ppp secret`.
-   - If not:
-     - Creates a matching `simple queue` if missing.
-     - Parses bandwidth from the queue.
-     - Matches it against the `ProfileBandwidth` script.
-     - Cross-checks for the correct PPP profile.
-     - Adds the user as **disabled** with the matched profile.
-4. Logs all actions to `/log`.
+## 🔧 Prerequisites
+
+### MikroTik Profile Setup (Required):
+
+For this script to match correctly, each profile must include the target bandwidth string in the **`comment`** field.
+
+| Profile Name | Comment (Required Format)      |
+|--------------|-------------------------------|
+| PLAN1000     | `20480k/20480k`               |
+| PLAN1695     | `30720k/30720k`               |
+| PLAN2000     | `40960k/40960k`               |
+| Vendo        | `1k/1k`                       |
+
+> The `comment` must match exactly what `max-limit` shows in dynamic queues.
 
 ---
 
-## ✅ Notes
-- You can edit your bandwidth plans in the script `ProfileBandwidth`.
-- Make sure your `/ppp profile` names exactly match the plans in `ProfileBandwidth` (no spaces, no extra characters).
-- Scheduler will auto-run, but you can trigger manually:
-```
-/system script run Auto-PPPoE-User-Creation
-```
+## 🔧 Script Installation
 
-## 🔗 Manual Triggers & Logs
-- To view logs:
-```
-/log print where message~"[AUTO-PPPOE]"
-```
-- To manually run:
-```
-/system script run Auto-PPPoE-User-Creation
-```
-- To check scheduler:
-```
-/system scheduler print
-```
+### 1. Open Winbox or WebFig
+
+- Go to: **System > Scripts**
+- Create a **new script**
+  - **Name:** `Auto-PPPoE-User-Creation`
+  - **Policy:** Enable `read`, `write`, `policy`, `test`
+  - **Paste the script below into the source**
 
 ---
 
-## 📎 Important:
-Always check your `ProfileBandwidth` format:
-```
-PLAN1000=20480k/20480k 20M/20M
-PLAN1695=30720k/30720k 30M/30M
-PLAN2000=40960k/40960k 40M/40M
-Vendo=1k/1k
-```
+## 📜 Script (Final Version)
 
----
+```rsc
+:local useGlobalPassword true
+:local globalPassword "pass123"
 
+:foreach u in=[/ppp active find] do={
+
+  :local username [/ppp active get $u name]
+  :local ipaddr [/ppp active get $u address]
+  :local password $username
+
+  :if ($useGlobalPassword = true) do={
+    :set password $globalPassword
+  }
+
+  :log info "[AUTO-PPPoE] Checking $username ($ipaddr)"
+
+  :if ([/ppp secret find where name="$username"] != "") do={
+    :log info "[AUTO-PPPoE] ✅ Already exists: $username"
+  } else={
+
+    :local qid [/queue simple find where name="<pppoe-$username>"]
+    :if ([:len $qid] = 0) do={
+      :log warning "[AUTO-PPPoE] ❌ No queue for $username"
+    } else={
+
+      :local limit [/queue simple get $qid max-limit]
+      :log info "[AUTO-PPPoE] Max-limit = $limit"
+
+      :local matchedProfile ""
+      :foreach p in=[/ppp profile find] do={
+
+        :local comment [/ppp profile get $p comment]
+        :if ($comment ~ $limit) do={
+          :set matchedProfile [/ppp profile get $p name]
+        }
+      }
+
+      :if ([:len $matchedProfile] > 0) do={
+        :log info "[AUTO-PPPoE] ✅ Matched profile: $matchedProfile for $limit"
+        /ppp secret add name=$username password=$password service=pppoe profile=$matchedProfile comment="AUTO-CREATED" disabled=yes
+        :log info "[AUTO-PPPoE] ➕ Added $username with profile $matchedProfile"
+      } else={
+        :log warning "[AUTO-PPPoE] ❌ No matching profile comment for $limit"
+      }
+    }
+  }
+}
