@@ -9,8 +9,6 @@
 # Supports toggle: username=password OR global password
 # ==========================================================
 
-
-
 /system script
 add dont-require-permissions=no name=Auto-PPPoE-User-Creation owner=jnhl \
     policy=ftp,reboot,read,write,policy,test,password,sniff,sensitive,romon \
