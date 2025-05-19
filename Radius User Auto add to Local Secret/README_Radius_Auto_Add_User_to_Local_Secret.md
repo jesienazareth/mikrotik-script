@@ -29,13 +29,7 @@ This profile name is example only use your own profile names, no need to copy th
 this is only example that in the comment section required to add the format below, 
 To ensure that each PPPoE user is assigned the correct bandwidth profile automatically,
 you must define the exact max-limit string in the comment field of each PPP profile.
-|--------------|-------------------------------|
-| PLAN1000     | `20480k/20480k`               |
-| PLAN1695     | `30720k/30720k`               |
-| PLAN2000     | `40960k/40960k`               |
-| Vendo        | `1k/1k`                       |
 
----
 
 ## ✅ How It Works
 
