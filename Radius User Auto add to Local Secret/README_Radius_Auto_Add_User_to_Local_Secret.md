@@ -31,6 +31,17 @@ To ensure that each PPPoE user is assigned the correct bandwidth profile automat
 you must define the exact max-limit string in the comment field of each PPP profile.
 
 
+| **PPP Profile Name** | **Comment (Exact Bandwidth)** |
+|----------------------|-------------------------------|
+| PLAN1000             | `20480k/20480k`               |
+| PLAN1695             | `30720k/30720k`               |
+| PLAN2000             | `40960k/40960k`               |
+
+> **Note:** The **profile name** can be anything you prefer.  
+> What matters is the **exact match** of the `comment` to the user's queue bandwidth.
+
+---
+
 ## ✅ How It Works
 
 1. The script scans all active PPPoE sessions.
