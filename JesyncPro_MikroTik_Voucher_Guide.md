@@ -124,7 +124,7 @@ add action=accept comment=jesync-pro disabled=no dst-address=172.16.100.4
 ```
 
 🧠 **Notes:**
-- Replace `172.16.100.4` (voucher store) and `172.16.100.4` (Jesync server) with your actual **Jesync dashboard IP**.
+- Replace `172.16.100.4` (Jesync server) with your actual **Jesync dashboard IP**.
 - These rules ensure that:
   - The **voucher store**, **payment gateways**, and **font/CDN resources** load even before login.
   - The hotspot login page remains responsive and visually styled.
