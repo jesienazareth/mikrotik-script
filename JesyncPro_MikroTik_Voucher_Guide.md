@@ -14,7 +14,7 @@ Paste the following section **into your Hotspot `login.html`**, ideally **below 
 
 <!-- Start Jesync Pro Voucher Store Integration -->
 <div class="text-center mt-3">
-  <a href="http://172.16.0.114:5000/voucher-store"
+  <a href="http://172.16.100.4:5000/voucher-store"
      class="btn btn-warning btn-block"
      style="font-weight:600; letter-spacing:.2px;">
     💳 Buy Voucher GCASH | MAYA
@@ -124,7 +124,7 @@ add action=accept comment=jesync-pro disabled=no dst-address=172.16.100.4
 ```
 
 🧠 **Notes:**
-- Replace `172.16.0.114` (voucher store) and `172.16.100.4` (Jesync server) with your actual **Jesync dashboard IP**.
+- Replace `172.16.100.4` (voucher store) and `172.16.100.4` (Jesync server) with your actual **Jesync dashboard IP**.
 - These rules ensure that:
   - The **voucher store**, **payment gateways**, and **font/CDN resources** load even before login.
   - The hotspot login page remains responsive and visually styled.
