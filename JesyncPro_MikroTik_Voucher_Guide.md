@@ -17,7 +17,7 @@ Paste the following section **into your Hotspot `login.html`**, ideally **below 
   <a href="http://172.16.100.4:5000/voucher-store"
      class="btn btn-warning btn-block"
      style="font-weight:600; letter-spacing:.2px;">
-    💳 Buy Voucher GCASH | MAYA
+    Buy Voucher GCASH | MAYA
   </a>
 </div>
 
