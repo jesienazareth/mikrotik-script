@@ -1,0 +1,17 @@
+# Drop anything in PREPAID_BLOCK
+/ip/firewall/filter add chain=forward src-address-list=PREPAID_BLOCK \
+    action=drop comment="Prepaid: drop blocked"
+
+# Allow anything in PREPAID_ACTIVE
+/ip/firewall/filter add chain=forward src-address-list=PREPAID_ACTIVE \
+    action=accept comment="Prepaid: allow active"
+
+# OPTIONAL
+# 1) Drop blocked as early as possible in RAW (saves CPU)
+/ip/firewall/raw add chain=prerouting src-address-list=PREPAID_BLOCK \
+    action=drop comment="Prepaid: raw drop blocked"
+
+# 2) (Optional) Limit ACTIVE -> WAN only (avoid access to side LANs)
+# If you already use an interface list=WAN, keep this; otherwise omit the next line.
+/ip/firewall/filter add chain=forward src-address-list=PREPAID_ACTIVE \
+    out-interface-list=WAN action=accept comment="Prepaid: allow active to WAN only"
